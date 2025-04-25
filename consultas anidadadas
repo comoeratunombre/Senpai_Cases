@@ -1,0 +1,64 @@
+Imprimir el nombre de los productos y su LIST PRICE para aquellos que tengan una cantidad mayor a 10, ordenados de forma ascendente.
+
+
+Análisis
+Productos están en la tabla PRODUCTS.
+
+
+La cantidad está en INVENTORIES.QUANTITY.
+
+
+Necesitamos hacer una unión entre INVENTORIES y PRODUCTS.
+Subquery idea:
+Filtrar productos con cantidad mayor a 10 desde INVENTORIES.
+SELECT p.PRODUCT_NAME, p.LIST_PRICE
+FROM PRODUCTS p
+JOIN INVENTORIES i ON p.PRODUCT_ID = i.PRODUCT_ID
+WHERE i.QUANTITY > 10
+ORDER BY p.LIST_PRICE ASC;
+
+
+Imprimir los nombres de los warehouses, el nombre del producto y su LIST_PRICE de aquellos ítems que su LIST_PRICE sea mayor al precio del producto 'Blockchain System Rollout'
+
+Analisis:
+El nombre del producto y su precio están en PRODUCTS.
+
+
+Los warehouses se conectan a PRODUCTS a través de INVENTORIES.
+
+
+Necesitamos una subconsulta que obtenga el LIST_PRICE del producto ‘Blockchain System Rollout’.
+
+SELECT w.WAREHOUSE_NAME, p.PRODUCT_NAME, p.LIST_PRICE
+FROM PRODUCTS p
+JOIN INVENTORIES i ON p.PRODUCT_ID = i.PRODUCT_ID
+JOIN WAREHOUSES w ON i.WAREHOUSE_ID = w.WAREHOUSE_ID
+WHERE p.LIST_PRICE > (
+    SELECT LIST_PRICE
+    FROM PRODUCTS
+    WHERE PRODUCT_NAME = 'Blockchain System Rollout'
+);
+
+
+
+
+Analisis
+SELECT PRODUCT_NAME, LIST_PRICE
+FROM PRODUCTS
+WHERE PRODUCT_NAME LIKE '%Blockchain%';
+
+Probablemente no existan productos mayores a 220.
+
+
+Imprimir el ORDER_ID y PRODUCT_ID de las órdenes que tengan ORDER_DATE en 2023.
+
+SELECT 
+    oi.ORDER_ID, 
+    oi.PRODUCT_ID
+FROM 
+    ORDER_ITEMS oi
+JOIN 
+    ORDERS o ON oi.ORDER_ID = o.ORDER_ID
+WHERE 
+    YEAR(o.ORDER_DATE) = 2023;
+
