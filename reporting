@@ -1,0 +1,64 @@
+Determinar la cantidad de productos por orden y el mes con mayor cantidad de productos (tomar el mes de ORDER_DATE) para el año 2022
+WITH ProductsPerOrder AS (
+    SELECT 
+        o.ORDER_ID,
+        o.ORDER_DATE,
+        MONTH(o.ORDER_DATE) AS order_month,
+        SUM(oi.QUANTITY) AS total_quantity
+    FROM 
+        ORDERS o
+    JOIN 
+        ORDER_ITEMS oi ON o.ORDER_ID = oi.ORDER_ID
+    WHERE 
+        YEAR(o.ORDER_DATE) = 2022
+    GROUP BY 
+        o.ORDER_ID, o.ORDER_DATE, MONTH(o.ORDER_DATE)
+),
+-- Parte 2: Calcular la cantidad total por mes
+MonthlyTotals AS (
+    SELECT 
+        order_month,
+        SUM(total_quantity) AS monthly_total
+    FROM 
+        ProductsPerOrder
+    GROUP BY 
+        order_month
+)
+-- Consulta principal - Determinar el mes con mayor cantidad de productos
+SELECT 
+    order_month AS month_with_most_products,
+    monthly_total AS total_products_in_month
+FROM 
+    MonthlyTotals
+WHERE 
+    monthly_total = (SELECT MAX(monthly_total) FROM MonthlyTotals);
+
+Para cada categoría, determinar la locación en la que se encuentran la mayor cantidad de productos
+WITH categoria_locacion AS (
+    SELECT 
+        pc.CATEGORY_NAME,
+        l.CITY,
+        SUM(i.QUANTITY) AS total_productos
+    FROM 
+        PRODUCTS p
+    JOIN PRODUCT_CATEGORIES pc ON p.CATEGORY_ID = pc.CATEGORY_ID
+    JOIN INVENTORIES i ON p.PRODUCT_ID = i.PRODUCT_ID
+    JOIN WAREHOUSES w ON i.WAREHOUSE_ID = w.WAREHOUSE_ID
+    JOIN LOCATIONS l ON w.LOCATION_ID = l.LOCATION_ID
+    GROUP BY 
+        pc.CATEGORY_NAME, l.CITY
+),
+ordenado AS (
+    SELECT *,
+           RANK() OVER (PARTITION BY CATEGORY_NAME ORDER BY total_productos DESC) AS rnk
+    FROM categoria_locacion
+)
+SELECT 
+    CATEGORY_NAME,
+    CITY,
+    total_productos
+FROM 
+    ordenado
+WHERE 
+    rnk = 1;
+
