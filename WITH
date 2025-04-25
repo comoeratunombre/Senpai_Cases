@@ -1,0 +1,58 @@
+Determinar todas las warehouses que la cantidad de productos almacenados sea mayor al promedio de los productos almacenados por warehouse.
+
+WITH TotalesPorWarehouse AS (
+    SELECT 
+        WAREHOUSE_ID,
+        SUM(QUANTITY) AS total_productos
+    FROM INVENTORIES
+    GROUP BY WAREHOUSE_ID
+),
+PromedioGeneral AS (
+    SELECT AVG(total_productos) AS promedio_general
+    FROM TotalesPorWarehouse
+)
+SELECT 
+    w.WAREHOUSE_ID,
+    w.WAREHOUSE_NAME,
+    t.total_productos
+FROM TotalesPorWarehouse t
+JOIN WAREHOUSES w ON t.WAREHOUSE_ID = w.WAREHOUSE_ID
+JOIN PromedioGeneral p ON t.total_productos > p.promedio_general;
+
+
+Top 3 de productos que contengan la letra E en su nombre y su LIST_PRICE sea menor al promedio del resto.
+
+WITH ProductosFiltrados AS (
+    SELECT 
+        PRODUCT_ID,
+        PRODUCT_NAME,
+        LIST_PRICE
+    FROM PRODUCTS
+    WHERE PRODUCT_NAME LIKE '%E%'
+),
+PromedioResto AS (
+    SELECT 
+        AVG(LIST_PRICE) AS promedio
+    FROM PRODUCTS
+    WHERE PRODUCT_NAME NOT LIKE '%E%'
+)
+SELECT 
+    PRODUCT_ID,
+    PRODUCT_NAME,
+    LIST_PRICE
+FROM ProductosFiltrados
+JOIN PromedioResto p ON ProductosFiltrados.LIST_PRICE < p.promedio
+ORDER BY LIST_PRICE
+LIMIT 3;
+
+AGRUPACIONES
+
+
+Ejemplo: Imprimir la cantidad de locaciones por región
+
+
+SELECT r.REGION_NAME, COUNT(l.LOCATION_ID) AS cantidad_locaciones
+FROM LOCATIONS l
+JOIN COUNTRIES c ON l.COUNTRY_ID = c.COUNTRY_ID
+JOIN REGIONS r ON c.REGION_ID = r.REGION_ID
+GROUP BY r.REGION_NAME;
