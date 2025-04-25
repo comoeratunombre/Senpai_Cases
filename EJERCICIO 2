@@ -1,0 +1,40 @@
+EJERCICIO 2
+
+
+-- IMPRIMIR EL NOMBRE DE LOS COSTUMERS CON EL NÚMERO DE IDENTIFICACIÓN DE LOS SALESMAN QUE LOS ATENDIERON–
+
+/*SELECT c.name AS customer_name, o.salesman_id
+FROM CUSTOMERS c
+INNER JOIN ORDERS o ON c.customer_id = o.customer_id;*/
+
+-- IMPRIMIR EL NOMBRE DE LOS COSTUMERS CON EL NOMBRE DE LOS SALESMAN QUE LOS ATENDIERON POR CADA ORDEN– 
+
+/*SELECT c.name AS customer_name, e.first_name AS salesman_first_name
+FROM CUSTOMERS c
+INNER JOIN ORDERS o ON c.customer_id = o.customer_id
+INNER JOIN EMPLOYEES e ON o.salesman_id = e.employee_id;*/
+
+/*Imprimir el nombre de los salesman con la fecha de cada orden que realizaron*/
+
+/*SELECT first_name, o.ORDER_DATE
+FROM ORDERS o
+JOIN EMPLOYEES e ON o.SALESMAN_ID = e.EMPLOYEE_ID;*/
+
+
+
+/* Imprimir los nombres de los productos con el nombre de su warehouse correspondiente y sus respectivos ID*/
+
+/*SELECT p.PRODUCT_NAME, w.WAREHOUSE_NAME, w.WAREHOUSE_ID
+FROM INVENTORIES i
+JOIN PRODUCTS p ON i.PRODUCT_ID = p.PRODUCT_ID
+JOIN WAREHOUSES w ON i.WAREHOUSE_ID = w.WAREHOUSE_ID;*/
+
+/*Top 3 de productos con LIST_PRICE > 50 y su correspondiente categoría*/
+
+/*SELECT p.PRODUCT_NAME, p.LIST_PRICE, c.CATEGORY_NAME
+FROM PRODUCTS p
+JOIN PRODUCT_CATEGORIES c ON p.CATEGORY_ID = c.CATEGORY_ID
+WHERE p.LIST_PRICE > 50
+ORDER BY p.LIST_PRICE DESC
+LIMIT 3;*/
+
