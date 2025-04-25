@@ -1,0 +1,151 @@
+1. Vista con la localidad y región de los warehouses + cantidad de productos almacenados
+
+
+
+CREATE VIEW vista_localidad_region_cantidad AS
+SELECT 
+    L.ADDRESS,
+    R.REGION_NAME,
+    SUM(I.QUANTITY) AS total_productos
+FROM 
+    INVENTORIES I
+    JOIN WAREHOUSES W ON I.WAREHOUSE_ID = W.WAREHOUSE_ID
+    JOIN LOCATIONS L ON W.LOCATION_ID = L.LOCATION_ID
+    JOIN COUNTRIES C ON L.COUNTRY_ID = C.COUNTRY_ID
+    JOIN REGIONS R ON C.REGION_ID = R.REGION_ID
+GROUP BY 
+    L.ADDRESS, R.REGION_NAME;
+
+-- Ejecutar esta consulta luego de haber creado la vista
+SELECT * FROM vista_localidad_region_cantidad;
+
+
+2. Crear una vista de la cantidad de órdenes entregadas asociadas a cada manager
+
+CREATE OR REPLACE VIEW vista_ordenes_por_manager AS
+SELECT 
+    E2.EMPLOYEE_ID AS manager_id,
+    CONCAT(E2.FIRST_NAME, ' ', E2.LAST_NAME) AS manager_name,
+    COUNT(O.ORDER_ID) AS total_ordenes_entregadas
+FROM 
+    ORDERS O
+    JOIN EMPLOYEES E ON O.SALESMAN_ID = E.EMPLOYEE_ID
+    JOIN EMPLOYEES E2 ON E.MANAGER_ID = E2.EMPLOYEE_ID
+WHERE 
+    O.STATUS = 'delivered'
+GROUP BY 
+    E2.EMPLOYEE_ID, E2.FIRST_NAME, E2.LAST_NAME;
+
+
+
+Crear una vista de los productos con cantidad entre 10 y 100, incluyendo su LIST_PRICE y la localidad del warehouse donde se encuentra.
+
+CREATE VIEW vista_productos_stock_localidad AS
+SELECT 
+    P.PRODUCT_NAME,
+    P.LIST_PRICE,
+    I.QUANTITY,
+    L.ADDRESS AS warehouse_localidad
+FROM 
+    INVENTORIES I
+    JOIN PRODUCTS P ON I.PRODUCT_ID = P.PRODUCT_ID
+    JOIN WAREHOUSES W ON I.WAREHOUSE_ID = W.WAREHOUSE_ID
+    JOIN LOCATIONS L ON W.LOCATION_ID = L.LOCATION_ID
+WHERE 
+    I.QUANTITY BETWEEN 10 AND 100;
+
+SELECT * FROM vista_productos_stock_localidad;
+
+
+
+Crear una vista de los productos con cantidad entre 10 y 100, incluyendo su LIST_PRICE y la localidad del warehouse donde se encuentra.
+CREATE VIEW vista_productos_stock_localidad AS
+SELECT 
+    P.PRODUCT_NAME,
+    P.LIST_PRICE,
+    I.QUANTITY,
+    L.ADDRESS AS warehouse_localidad
+FROM 
+    INVENTORIES I
+    JOIN PRODUCTS P ON I.PRODUCT_ID = P.PRODUCT_ID
+    JOIN WAREHOUSES W ON I.WAREHOUSE_ID = W.WAREHOUSE_ID
+    JOIN LOCATIONS L ON W.LOCATION_ID = L.LOCATION_ID
+WHERE 
+    I.QUANTITY BETWEEN 10 AND 100;
+
+
+
+Ejercicio 4: Eliminar las vistas creadas
+
+DROP VIEW IF EXISTS vista_localidad_region_cantidad;
+DROP VIEW IF EXISTS vista_ordenes_por_manager;
+DROP VIEW IF EXISTS vista_productos_stock_localidad;
+
+
+Calcular número de fila, rank y dense rank de los productos de acuerdo a su list_price según cada categoría
+SELECT 
+    p.PRODUCT_ID,
+    p.PRODUCT_NAME,
+    p.CATEGORY_ID,
+    pc.CATEGORY_NAME,
+    p.LIST_PRICE,
+    ROW_NUMBER() OVER (PARTITION BY p.CATEGORY_ID ORDER BY p.LIST_PRICE DESC) AS row_num,
+    RANK() OVER (PARTITION BY p.CATEGORY_ID ORDER BY p.LIST_PRICE DESC) AS rank_price,
+    DENSE_RANK() OVER (PARTITION BY p.CATEGORY_ID ORDER BY p.LIST_PRICE DESC) AS dense_rank_price
+FROM 
+    PRODUCTS p
+JOIN 
+    PRODUCT_CATEGORIES pc ON p.CATEGORY_ID = pc.CATEGORY_ID
+ORDER BY 
+    p.CATEGORY_ID, p.LIST_PRICE DESC;
+
+
+
+Determinar número de fila, rank y dense rank de los productos de acuerdo a su cantidad según su order_id
+SELECT 
+    oi.ORDER_ID,
+    oi.PRODUCT_ID,
+    p.PRODUCT_NAME,
+    oi.QUANTITY,
+    ROW_NUMBER() OVER (PARTITION BY oi.ORDER_ID ORDER BY oi.QUANTITY DESC) AS row_num,
+    RANK() OVER (PARTITION BY oi.ORDER_ID ORDER BY oi.QUANTITY DESC) AS rank_qty,
+    DENSE_RANK() OVER (PARTITION BY oi.ORDER_ID ORDER BY oi.QUANTITY DESC) AS dense_rank_qty
+FROM 
+    ORDER_ITEMS oi
+JOIN 
+    PRODUCTS p ON oi.PRODUCT_ID = p.PRODUCT_ID
+ORDER BY 
+    oi.ORDER_ID, oi.QUANTITY DESC;
+
+Calcular número de fila, rank y dense rank de las regiones de acuerdo al país según su localidad
+WITH RegionLocationCounts AS (
+    SELECT 
+        r.REGION_ID,
+        r.REGION_NAME,
+        c.COUNTRY_ID,
+        c.COUNTRY_NAME,
+        COUNT(l.LOCATION_ID) AS location_count
+    FROM 
+        REGIONS r
+    JOIN 
+        COUNTRIES c ON r.REGION_ID = c.REGION_ID
+    JOIN 
+        LOCATIONS l ON c.COUNTRY_ID = l.COUNTRY_ID
+    GROUP BY 
+        r.REGION_ID, r.REGION_NAME, c.COUNTRY_ID, c.COUNTRY_NAME
+)
+SELECT 
+    rlc.REGION_ID,
+    rlc.REGION_NAME,
+    rlc.COUNTRY_ID,
+    rlc.COUNTRY_NAME,
+    rlc.location_count,
+    ROW_NUMBER() OVER (PARTITION BY rlc.COUNTRY_ID ORDER BY rlc.REGION_ID) AS row_num,
+    RANK() OVER (PARTITION BY rlc.COUNTRY_ID ORDER BY rlc.location_count DESC) AS rank_loc,
+    DENSE_RANK() OVER (PARTITION BY rlc.COUNTRY_ID ORDER BY rlc.location_count DESC) AS dense_rank_loc
+FROM 
+    RegionLocationCounts rlc
+ORDER BY 
+    rlc.COUNTRY_ID, rank_loc;
+
+
