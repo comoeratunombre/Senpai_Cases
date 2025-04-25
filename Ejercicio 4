@@ -1,0 +1,26 @@
+Ejercicio 1: Retornar la cantidad de Warehouses por locación
+
+SELECT l.LOCATION_ID, COUNT(w.WAREHOUSE_ID) AS cantidad_warehouses
+FROM WAREHOUSES w
+JOIN LOCATIONS l ON w.LOCATION_ID = l.LOCATION_ID
+GROUP BY l.LOCATION_ID;
+
+
+
+Ejercicio 2: Imprimir la cantidad de productos agrupados por nombre de los mismos
+
+SELECT PRODUCT_NAME, COUNT(PRODUCT_ID) AS cantidad
+FROM PRODUCTS
+GROUP BY PRODUCT_NAME;
+
+
+
+Ejercicio 3: Top 5 de los nombres de los empleados con mayor cantidad de ventas
+
+SELECT e.FIRST_NAME, e.LAST_NAME, SUM(oi.QUANTITY) AS total_vendido
+FROM EMPLOYEES e
+JOIN ORDERS o ON e.EMPLOYEE_ID = o.SALESMAN_ID
+JOIN ORDER_ITEMS oi ON o.ORDER_ID = oi.ORDER_ID
+GROUP BY e.FIRST_NAME, e.LAST_NAME
+ORDER BY total_vendido DESC
+LIMIT 5;  
