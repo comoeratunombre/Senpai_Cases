@@ -1,0 +1,30 @@
+Ejemplo: Categorías con más de 50 productos
+
+SELECT pc.CATEGORY_NAME, COUNT(p.PRODUCT_ID) AS cantidad_productos
+FROM PRODUCTS p
+JOIN PRODUCT_CATEGORIES pc ON p.CATEGORY_ID = pc.CATEGORY_ID
+GROUP BY pc.CATEGORY_NAME
+HAVING COUNT(p.PRODUCT_ID) > 50;
+
+
+
+query para ver todas las categorías y su cantidad de productos, sin filtros:
+
+SELECT pc.CATEGORY_NAME, COUNT(p.PRODUCT_ID) AS cantidad_productos
+FROM PRODUCTS p
+JOIN PRODUCT_CATEGORIES pc ON p.CATEGORY_ID = pc.CATEGORY_ID
+GROUP BY pc.CATEGORY_NAME
+ORDER BY cantidad_productos DESC;
+
+
+
+Todas las categorías tienen 7 productos:
+
+Version ajustada de Query:
+
+SELECT pc.CATEGORY_NAME, COUNT(p.PRODUCT_ID) AS cantidad_productos
+FROM PRODUCTS p
+JOIN PRODUCT_CATEGORIES pc ON p.CATEGORY_ID = pc.CATEGORY_ID
+GROUP BY pc.CATEGORY_NAME
+HAVING COUNT(p.PRODUCT_ID) > 5
+ORDER BY cantidad_productos DESC;
